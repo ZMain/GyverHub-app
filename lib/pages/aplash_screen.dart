@@ -5,8 +5,18 @@ import 'package:get_storage/get_storage.dart';
 import 'package:gyver_hub/env.dart';
 import 'package:mini_server/mini_server_package.dart';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
 
 import '../core/helpers.dart';
+
+Future initPermission() async {
+  await GetStorage.init();
+  await Permission.storage.request();
+  await Permission.bluetooth.request();
+  await Permission.bluetoothScan.request();
+  await Permission.bluetoothAdvertise.request();
+  await Permission.bluetoothConnect.request();
+}
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
       final version = box.read('version');
 
       if (res.body != version) {
-        final hub = await http.get(Uri.parse(Env.appUrl));
+        final hub = await http.get(Uri.parse(Env.hubUrl));
         box.write('hub', hub.body);
         box.write('version', res.body);
       }
@@ -61,7 +71,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> run() async {
     box = GetStorage();
-    await checkVersion();
+    await initPermission();
+
+    final String hub = box.read<String?>('hub') ?? '';
+    if (hub.isEmpty) {
+      await checkVersion();
+    } else {
+      checkVersion();
+    }
+
     startServer();
   }
 

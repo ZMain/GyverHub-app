@@ -19,6 +19,11 @@ dependencies:
   cupertino_icons: ^1.0.6
   http: ^1.1.0
   lottie: ^2.7.0
+  permission_handler: ^11.0.1
+  open_file: ^3.3.2
+
+
+#  flutter_downloader: ^1.11.4
 
 dev_dependencies:
   flutter_test:
