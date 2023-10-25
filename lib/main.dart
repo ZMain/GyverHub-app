@@ -32,13 +32,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'GuverHub',
+      themeMode: ThemeMode.light,
+      darkTheme: ThemeData.light(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light().copyWith(
         colorScheme: ColorScheme.fromSeed(seedColor: Env.primColor),
         scaffoldBackgroundColor: Env.bgColorDark,
         splashColor: Env.bgColorDark,
       ),
-      // home: const MyHomePage(title: 'Flutter Demo Home Page'),
       initialRoute: '/splash-screen',
       routes: {
         '/splash-screen': (ctx) => const SplashScreen(),
