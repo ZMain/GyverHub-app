@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'GuverHub',
+      title: 'GyverHub',
       themeMode: ThemeMode.light,
       darkTheme: ThemeData.light(),
       debugShowCheckedModeBanner: false,
