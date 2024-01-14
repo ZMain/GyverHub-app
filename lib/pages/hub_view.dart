@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -61,8 +62,9 @@ class _HubViewState extends State<HubView> {
           ));
           return false;
         }
+
         exit(0);
-        return true;
+              return true;
       },
       child: Scaffold(
         extendBody: false,
@@ -105,6 +107,53 @@ class _HubViewState extends State<HubView> {
                     if (!initJs) {
                       initJs = true;
                       await controller.evaluateJavascript(source: """
+                       async function cfg_export() {
+                            try {
+                              const textToCopy = btoa(JSON.stringify(cfg)) + ';' + btoa(JSON.stringify(hub.cfg)) + ';' + btoa(encodeURIComponent(hub.export()))
+                               var textArea = document.createElement("textarea");
+                              textArea.value = textToCopy;
+                              document.body.appendChild(textArea);
+                              textArea.select();
+                              document.execCommand('copy');
+                              document.body.removeChild(textArea);
+                              showPopup(lang.clip_copy);
+                            } catch (e) {
+                              showPopupError(lang.error);
+                            }                    
+                                                    
+                       }
+                       """);
+
+                      await controller.evaluateJavascript(source: """                
+                       async function cfg_import() {
+                            try {
+                            let text = "";
+                              await window.flutter_inappwebview.callHandler('getClipboardText').then(function(clipboardText) {
+                                text = clipboardText
+                              });
+                             
+                              text = text.split(';');
+                              try {
+                                cfg = JSON.parse(atob(text[0]));
+                              } catch (e) { }
+                              try {
+                                hub.cfg = JSON.parse(atob(text[1]));
+                              } catch (e) { }
+                              try {
+                                hub.import(decodeURIComponent(atob(text[2])));
+                              } catch (e) { }
+                          
+                              save_cfg();
+                              save_devices();
+                              showPopup('Import done');
+                              setTimeout(() => location.reload(), 1500);
+                            } catch (e) {
+                              showPopupError('test data');
+                            }       
+                                                    
+                       }
+                       """);
+                      await controller.evaluateJavascript(source: """
                         document.body.addEventListener('click', (e) => {
                             if (e.target.hasAttribute(`download`)) {
                                 console.log(JSON.stringify({
@@ -112,7 +161,8 @@ class _HubViewState extends State<HubView> {
                                 }));
                             }
                         });   
-                    """);
+                       """);
+
                     }
                   },
                   shouldOverrideUrlLoading: (controller, navigationAction) async {
@@ -132,6 +182,13 @@ class _HubViewState extends State<HubView> {
                   },
                   onWebViewCreated: (controller) async {
                     webViewController = controller;
+                    webViewController?.addJavaScriptHandler(
+                      handlerName: 'getClipboardText',
+                      callback: (args) async {
+                        String clipboardText = await _getFromClipboard();
+                        return clipboardText;
+                      },
+                    );
                   },
                 ),
               ),
@@ -169,4 +226,14 @@ class _HubViewState extends State<HubView> {
     var directory = await getDownloadsDirectory();
     return directory!.path + Platform.pathSeparator + 'GyverHub';
   }
+
+  Future<String> _getFromClipboard() async {
+    ClipboardData? clipboardData = await Clipboard.getData('text/plain');
+    return clipboardData?.text ?? '';
+  }
+
+  Future<String> Function() handleJavaScriptCall(List<dynamic> args) {
+    return _getFromClipboard;
+  }
+
 }
