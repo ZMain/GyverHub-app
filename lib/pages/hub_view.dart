@@ -76,6 +76,57 @@ class _HubViewState extends State<HubView> {
                 child: InAppWebView(
                   key: webViewKey,
                   initialUrlRequest: URLRequest(url: WebUri('http://localhost:9090/')),
+                    onProgressChanged: (controller, progress) {
+                      if (progress == 100) {
+                        controller.evaluateJavascript(source: """
+                       async function cfg_export() {
+                            try {
+                              const textToCopy = btoa(JSON.stringify(cfg)) + ';' + btoa(JSON.stringify(hub.cfg)) + ';' + btoa(encodeURIComponent(hub.export()))
+                               var textArea = document.createElement("textarea");
+                              textArea.value = textToCopy;
+                              document.body.appendChild(textArea);
+                              textArea.select();
+                              document.execCommand('copy');
+                              document.body.removeChild(textArea);
+                              showPopup(lang.clip_copy);
+                            } catch (e) {
+                              showPopupError(lang.error);
+                            }                    
+                                                    
+                       }
+                       """);
+
+                        controller.evaluateJavascript(source: """                
+                       async function cfg_import() {
+                            try {
+                            let text = "";
+                              await window.flutter_inappwebview.callHandler('getClipboardText').then(function(clipboardText) {
+                                text = clipboardText
+                              });
+                             
+                              text = text.split(';');
+                              try {
+                                cfg = JSON.parse(atob(text[0]));
+                              } catch (e) { }
+                              try {
+                                hub.cfg = JSON.parse(atob(text[1]));
+                              } catch (e) { }
+                              try {
+                                hub.import(decodeURIComponent(atob(text[2])));
+                              } catch (e) { }
+                          
+                              save_cfg();
+                              save_devices();
+                              showPopup('Import done');
+                              setTimeout(() => location.reload(), 1500);
+                            } catch (e) {
+                              showPopupError('test data');
+                            }       
+                                                    
+                       }
+                       """);
+                      }
+                    },
                   initialSettings: InAppWebViewSettings(
                     supportZoom: false,
                     javaScriptEnabled: true,
@@ -106,53 +157,6 @@ class _HubViewState extends State<HubView> {
                   onLoadStop: (controller, url) async {
                     if (!initJs) {
                       initJs = true;
-                      await controller.evaluateJavascript(source: """
-                       async function cfg_export() {
-                            try {
-                              const textToCopy = btoa(JSON.stringify(cfg)) + ';' + btoa(JSON.stringify(hub.cfg)) + ';' + btoa(encodeURIComponent(hub.export()))
-                               var textArea = document.createElement("textarea");
-                              textArea.value = textToCopy;
-                              document.body.appendChild(textArea);
-                              textArea.select();
-                              document.execCommand('copy');
-                              document.body.removeChild(textArea);
-                              showPopup(lang.clip_copy);
-                            } catch (e) {
-                              showPopupError(lang.error);
-                            }                    
-                                                    
-                       }
-                       """);
-
-                      await controller.evaluateJavascript(source: """                
-                       async function cfg_import() {
-                            try {
-                            let text = "";
-                              await window.flutter_inappwebview.callHandler('getClipboardText').then(function(clipboardText) {
-                                text = clipboardText
-                              });
-                             
-                              text = text.split(';');
-                              try {
-                                cfg = JSON.parse(atob(text[0]));
-                              } catch (e) { }
-                              try {
-                                hub.cfg = JSON.parse(atob(text[1]));
-                              } catch (e) { }
-                              try {
-                                hub.import(decodeURIComponent(atob(text[2])));
-                              } catch (e) { }
-                          
-                              save_cfg();
-                              save_devices();
-                              showPopup('Import done');
-                              setTimeout(() => location.reload(), 1500);
-                            } catch (e) {
-                              showPopupError('test data');
-                            }       
-                                                    
-                       }
-                       """);
                       await controller.evaluateJavascript(source: """
                         document.body.addEventListener('click', (e) => {
                             if (e.target.hasAttribute(`download`)) {
