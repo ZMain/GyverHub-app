@@ -4,9 +4,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 
 class HubView extends StatefulWidget {
   const HubView({super.key});
@@ -19,7 +22,8 @@ class _HubViewState extends State<HubView> {
   final GlobalKey webViewKey = GlobalKey();
 
   InAppWebViewController? webViewController;
-
+  FlutterReactiveBle _flutterReactiveBle = FlutterReactiveBle();
+  List<DiscoveredDevice> _discoveredDevices = [];
 
   late TargetPlatform? platform;
 
@@ -39,6 +43,7 @@ class _HubViewState extends State<HubView> {
   DateTime? currentBackPressTime;
 
   bool initJs = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,34 +101,48 @@ class _HubViewState extends State<HubView> {
                        }
                        """);
 
-                        controller.evaluateJavascript(source: """                
-                       async function cfg_import() {
-                            try {
-                            let text = "";
-                              await window.flutter_inappwebview.callHandler('getClipboardText').then(function(clipboardText) {
-                                text = clipboardText
-                              });
-                             
-                              text = text.split(';');
-                              try {
-                                cfg = JSON.parse(atob(text[0]));
-                              } catch (e) { }
-                              try {
-                                hub.cfg = JSON.parse(atob(text[1]));
-                              } catch (e) { }
-                              try {
-                                hub.import(decodeURIComponent(atob(text[2])));
-                              } catch (e) { }
-                          
-                              save_cfg();
-                              save_devices();
-                              showPopup('Import done');
-                              setTimeout(() => location.reload(), 1500);
-                            } catch (e) {
-                              showPopupError('test data');
-                            }       
-                                                    
-                       }
+                        controller.evaluateJavascript(source: """  
+                         document.body.addEventListener('DOMContentLoaded', function () {
+                              // Получаем кнопку по селектору
+                              var myButton = document.querySelector('#bt_btn');
+                               alert(myButton);
+                              // Добавляем обработчик события click
+                              if (myButton) {
+                                myButton.addEventListener('click', function () {
+                                  // Ваш код, который будет выполнен при клике на кнопку
+                                 alert('Button clicked!');
+                                });
+                              }
+                            });
+                           async function cfg_import() {
+                                try {
+                                let text = "";
+                                  await window.flutter_inappwebview.callHandler('getClipboardText').then(function(clipboardText) {
+                                    text = clipboardText
+                                  });    
+                                  await window.flutter_inappwebview.callHandler('getDevice').then(function(clipboardText) {
+                                    alert(clipboardText)
+                                  });                          
+                                  text = text.split(';');
+                                  try {
+                                    cfg = JSON.parse(atob(text[0]));
+                                  } catch (e) { }
+                                  try {
+                                    hub.cfg = JSON.parse(atob(text[1]));
+                                  } catch (e) { }
+                                  try {
+                                    hub.import(decodeURIComponent(atob(text[2])));
+                                  } catch (e) { }
+                              
+                                  save_cfg();
+                                  save_devices();
+                                  showPopup('Import done');
+                                  setTimeout(() => location.reload(), 1500);
+                                } catch (e) {
+                                  showPopupError('test data');
+                                }       
+                                                        
+                           }
                        """);
                       }
                     },
@@ -157,7 +176,9 @@ class _HubViewState extends State<HubView> {
                   onLoadStop: (controller, url) async {
                     if (!initJs) {
                       initJs = true;
+
                       await controller.evaluateJavascript(source: """
+                         
                         document.body.addEventListener('click', (e) => {
                             if (e.target.hasAttribute(`download`)) {
                                 console.log(JSON.stringify({
@@ -186,6 +207,17 @@ class _HubViewState extends State<HubView> {
                   },
                   onWebViewCreated: (controller) async {
                     webViewController = controller;
+
+                    webViewController?.addJavaScriptHandler(
+                      handlerName: 'getDevice',
+                      callback: (args) async {
+                       // _startScanning();
+                        _requestPermissions();
+                        return _connectToDevice(_discoveredDevices as DiscoveredDevice);
+
+                      },
+                    );
+
                     webViewController?.addJavaScriptHandler(
                       handlerName: 'getClipboardText',
                       callback: (args) async {
@@ -193,6 +225,7 @@ class _HubViewState extends State<HubView> {
                         return clipboardText;
                       },
                     );
+
                   },
                 ),
               ),
@@ -236,8 +269,39 @@ class _HubViewState extends State<HubView> {
     return clipboardData?.text ?? '';
   }
 
-  Future<String> Function() handleJavaScriptCall(List<dynamic> args) {
-    return _getFromClipboard;
+  void _requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.bluetooth,
+           Permission.location,
+    ].request();
+
+    // Check if permissions are granted
+    if (statuses[Permission.location] == PermissionStatus.granted) {
+      // Continue with Bluetooth operations
+      _startScanning();
+    } else {
+      // Handle the case where permissions are not granted
+      print('Location permission not granted');
+    }
+  }
+  void _startScanning() {
+    _flutterReactiveBle.scanForDevices(withServices: []).listen(
+          (scanResult) {
+        // Update the list of discovered devices
+        setState(() {
+          _discoveredDevices.add(scanResult);
+        });
+      },
+      onError: (error) {
+        // Handle scanning errors
+        print('Scanning error: $error');
+      },
+    );
+  }
+
+  void _connectToDevice(DiscoveredDevice device) {
+    // Add your logic to connect to the selected device
+    print('Connecting to device: ${device}');
   }
 
 }

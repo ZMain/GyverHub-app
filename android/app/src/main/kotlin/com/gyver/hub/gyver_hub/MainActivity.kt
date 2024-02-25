@@ -1,4 +1,4 @@
-package com.gyver.hub.gyver_hub
+package ru.alexgyver.GyverHub
 
 import io.flutter.embedding.android.FlutterActivity
 import androidx.annotation.NonNull;

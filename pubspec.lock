@@ -113,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  fixnum:
+    dependency: transitive
+    description:
+      name: fixnum
+      sha256: "25517a4deb0c03aa0f32fd12db525856438902d9c16536311e76cdc57b31d7d1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -122,18 +130,58 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_inappwebview
-      sha256: "786b124c944f4914670868c9775c90600a4d4674497f617190c0d676019e337b"
+      sha256: "3e9a443a18ecef966fb930c3a76ca5ab6a7aafc0c7b5e14a4a850cf107b09959"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0-beta.25"
+    version: "6.0.0"
+  flutter_inappwebview_android:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_android
+      sha256: fd4db51e46f49b140d83a3206851432c54ea920b381137c0ba82d0cf59be1dee
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.12"
   flutter_inappwebview_internal_annotations:
     dependency: transitive
     description:
       name: flutter_inappwebview_internal_annotations
-      sha256: "064a8ccbc76217dcd3b0fd6c6ea6f549e69b2849a0233b5bb46af9632c3ce2ff"
+      sha256: "5f80fd30e208ddded7dbbcd0d569e7995f9f63d45ea3f548d8dd4c0b473fb4c8"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
+  flutter_inappwebview_ios:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_ios
+      sha256: f363577208b97b10b319cd0c428555cd8493e88b468019a8c5635a0e4312bd0f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.13"
+  flutter_inappwebview_macos:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_macos
+      sha256: b55b9e506c549ce88e26580351d2c71d54f4825901666bd6cfa4be9415bb2636
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.11"
+  flutter_inappwebview_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_platform_interface
+      sha256: "545fd4c25a07d2775f7d5af05a979b2cac4fbf79393b0a7f5d33ba39ba4f6187"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.10"
+  flutter_inappwebview_web:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_web
+      sha256: d8c680abfb6fec71609a700199635d38a744df0febd5544c5a020bd73de8ee07
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.8"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -142,6 +190,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.1"
+  flutter_reactive_ble:
+    dependency: "direct main"
+    description:
+      name: flutter_reactive_ble
+      sha256: "7a0d245412dc8e1b72ce2adc423808583b42ce824b1be74001ff22c8bb5ada48"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -152,6 +208,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  functional_data:
+    dependency: transitive
+    description:
+      name: functional_data
+      sha256: aefdec4365452283b2a7cf420a3169654d51d3e9553069a22d76680d7a9d7c3d
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   get:
     dependency: transitive
     description:
@@ -392,6 +456,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.7.3"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: "01dd9bd0fa02548bf2ceee13545d4a0ec6046459d847b6b061d8a27237108a08"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
+  reactive_ble_mobile:
+    dependency: transitive
+    description:
+      name: reactive_ble_mobile
+      sha256: e4623446d5fd6e641c984892ee1fa7c67499a2bb0971d85a500815e1d05db6fb
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.0"
+  reactive_ble_platform_interface:
+    dependency: transitive
+    description:
+      name: reactive_ble_platform_interface
+      sha256: "8988d16497886dccc69dca1c3eebce28ae387371f3f948a4f1b03dec9954fb05"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.0"
   sky_engine:
     dependency: transitive
     description: flutter
