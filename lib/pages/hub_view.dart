@@ -102,27 +102,14 @@ class _HubViewState extends State<HubView> {
                        """);
 
                         controller.evaluateJavascript(source: """  
-                         document.body.addEventListener('DOMContentLoaded', function () {
-                              // Получаем кнопку по селектору
-                              var myButton = document.querySelector('#bt_btn');
-                               alert(myButton);
-                              // Добавляем обработчик события click
-                              if (myButton) {
-                                myButton.addEventListener('click', function () {
-                                  // Ваш код, который будет выполнен при клике на кнопку
-                                 alert('Button clicked!');
-                                });
-                              }
-                            });
+                        
                            async function cfg_import() {
                                 try {
                                 let text = "";
                                   await window.flutter_inappwebview.callHandler('getClipboardText').then(function(clipboardText) {
                                     text = clipboardText
                                   });    
-                                  await window.flutter_inappwebview.callHandler('getDevice').then(function(clipboardText) {
-                                    alert(clipboardText)
-                                  });                          
+                                                         
                                   text = text.split(';');
                                   try {
                                     cfg = JSON.parse(atob(text[0]));
@@ -136,10 +123,10 @@ class _HubViewState extends State<HubView> {
                               
                                   save_cfg();
                                   save_devices();
-                                  showPopup('Import done');
+                                  showPopup(lang.import_ok);
                                   setTimeout(() => location.reload(), 1500);
                                 } catch (e) {
-                                  showPopupError('test data');
+                                  showPopupError(lang.import_err);
                                 }       
                                                         
                            }
