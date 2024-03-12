@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -53,11 +54,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (check) {
       final res = await http.get(Uri.parse(Env.versionUrl));
+      String resUtf8 = utf8.decode(res.bodyBytes);
       final version = box.read('version');
 
-      if (res.body != version) {
+      if (resUtf8 != version) {
         final hub = await http.get(Uri.parse(Env.hubUrl));
-        box.write('hub', hub.body);
+        String bodyUtf8 = utf8.decode(hub.bodyBytes);
+        box.write('hub', bodyUtf8);
         box.write('version', res.body);
       }
     }
@@ -73,7 +76,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
     miniServer.get("/", (HttpRequest httpRequest) async {
       final x = httpRequest.response;
-      x.headers.add('Content-Type', 'text/html; charset=utf-8');
+
+      String charset = x.headers.contentType?.charset ?? "utf-8";
+
+      x.headers.contentType = ContentType("text", "html", charset: charset);
       x.headers.add('Access-Control-Allow-Origin', '*');
       x.headers.add('Access-Control-Allow-Private-Network', "true");
 
@@ -94,14 +100,14 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> run() async {
     box = GetStorage();
     await initPermission();
-
-    final String hub = box.read<String?>('hub') ?? '';
-    if (hub.isEmpty) {
-      await checkVersion();
-    } else {
-      checkVersion();
-    }
-
+    //
+    // final String hub = box.read<String?>('hub') ?? '';
+    // if (hub.isEmpty) {
+    //   await checkVersion();
+    // } else {
+    //   checkVersion();
+    // }
+    await checkVersion();
     startServer();
   }
 
